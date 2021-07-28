@@ -1,23 +1,21 @@
 import logo from './logo.svg';
 import './App.css';
+import React,{useState} from 'react';
+
+const quotes = [
+  'It was a pleasure to burn',
+  'Fear is the mind-killer. Fear is the little-death that brings total obliteration. I will face my fear. I will permit it to pass over me and through me.',
+  'It’s still magic even if you know how it’s done'
+]
 
 function App() {
+  const [counter, setCounter] = useState(2)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div 
+      onClick={(event) => setCounter(counter + 1)}
+      className="App"
+    >
+      {quotes[counter % quotes.length]}
     </div>
   );
 }
