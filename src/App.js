@@ -1,23 +1,55 @@
-import logo from './logo.svg';
 import './App.css';
-import React,{useState} from 'react';
+import React,{Component, useState} from 'react';
 
-const quotes = [
-  'It was a pleasure to burn',
-  'Fear is the mind-killer. Fear is the little-death that brings total obliteration. I will face my fear. I will permit it to pass over me and through me.',
-  'It’s still magic even if you know how it’s done'
-]
+const API = 'https://hn.algolia.com/api/v1/search?query=';
+const DEFAULT_QUERY = 'redux';
 
-function App() {
-  const [counter, setCounter] = useState(2)
-  return (
-    <div 
-      onClick={(event) => setCounter(counter + 1)}
-      className="App"
-    >
-      {quotes[counter % quotes.length]}
-    </div>
-  );
+class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      hits:[],
+      isLoading: false,
+      error: null,
+    };
+  }
+
+  componentDidMount() {
+    this.setState({
+      isLoading: true
+    });
+
+    fetch(API + DEFAULT_QUERY)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => this.setState({ hits: data.hits, isLoading: false }))
+      .catch(error => this.setState({ error, isLoading: false }));
+  }
+
+  render() {
+    const { hits, isLoading, error} = this.state;
+    if (error) {
+      return <p> {error.message}</p>;
+    }
+    if (isLoading) {
+      return <p> Loading bro </p>;
+    }
+    return (
+      <ul>
+        {hits.map(hit => 
+          <li key={hit.objectID}>
+            <a href={hit.url}>{hit.title}</a> 
+          </li>
+        )}
+      </ul>
+    );
+  }
 }
 
 export default App;
