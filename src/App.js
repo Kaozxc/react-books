@@ -1,87 +1,54 @@
 import './App.css';
 import React,{Fragment, Component, useState, useEffect} from 'react';
 
-function TodoForm({ addTodo}) {
-  const [value, setValue] = useState('');
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    if (!value) return;
-    addTodo(value);
-    setValue('');
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-      type="text"
-      className="input"
-      value={value}
-      onChange={e => setValue(e.target.value)}
-      />
-    </form>
-  );
-}
-
-function Todo({ todo, index, completeTodo, removeTodo}) {
-  return (
-    <div 
-      className="todo"
-      style={{ textDecoration: todo.isCompleted ? 'line-through' : ''}} 
-    >
-      {todo.text}
-      <div>
-        <button onClick={() => completeTodo(index)}> Complete </button>
-        <button onClick={() => removeTodo(index)}>x</button>
-      </div>
-    </div>
-  );
-};
-
 export default function App() {
-  const [todos,setTodos] = useState([
-    { text: 'Learn about React',
-      isCompleted: false
-    },
-    { text: 'Meet friend for lunch',
-      isCompleted: false
-    },
-    { text: 'Build really cool todo app',
-      isCompleted:false 
-    },
-  ]);
 
-  const removeTodo = index => {
-    const newTodos = [...todos];
-    newTodos.splice(index, 1);
-    setTodos(newTodos);
-  };
+  const calculateTimeLeft = () => {
+    let year = new Date().getFullYear();
+    const difference = +new Date(`10/01/${year}`) - +new Date();
+    let timeLeft = {};
 
-  const completeTodo = index => {
-    const newTodos = [...todos];
-    newTodos[index].isCompleted = true;
-    setTodos(newTodos);
-  };
+    if (difference > 0) {
+      timeLeft = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000 ) % 60),
+      };
+    }
+    return timeLeft;
+  }
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
-  const addTodo = text => {
-    const newTodos = [...todos, { text }];
-    setTodos(newTodos);
-  };
+  const [year] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+    return () => clearTimeout(timer);
+  });
+
+  const timerComponents = [];
+
+  Object.keys(timeLeft).forEach((interval) => {
+    if (!timeLeft[interval]) {
+      return;
+    }
+
+    timerComponents.push(
+      <span>
+        {timeLeft[interval]} {interval}{' '}
+      </span>
+    );
+  });
 
   return (
-    <div className="app">
-      <div className="todo-list">
-        {todos.map((todo,index) => (
-          <Todo
-            key={index}
-            index={index}
-            todo={todo}
-            completeTodo={completeTodo}
-            removeTodo={removeTodo}
-            />
-        ))}
-        <TodoForm addTodo={addTodo} />
-        </div>
-      </div>
-  );
+    <div>
+    <h1> Hacktoberfest {year} Countdown </h1>
+      <h2> With React Hooks</h2>
+     {timerComponents.length ? timerComponents : <span> Time's up</span>}
+    </div>
+  )
+
 }
